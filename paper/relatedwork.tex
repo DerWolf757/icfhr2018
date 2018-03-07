@@ -1,0 +1,155 @@
+\section{Related Work}\label{sec:relatedwork}
+Word spotting methods that are addressing segmentation and retrieval jointly are referred to as
+segmentation-free. 
+%Most prominently, hidden Markov models only require a given segmentation on
+%line-level. By computing an optimal alignment of the query model and a so-called filler or
+%background model, the most likely position of the query in the text line as well as the
+%probability for the relevancy of the text line can be obtained, cf. \cite{Puigcerver15a}. 
+In order to address the segmentation problem at document level, mainly two different approaches
+can be identified. Based on local text detectors, different competing word hypotheses are obtained,
+cf. \cite{Leydier09, Rodriguez09, Kovalchuk14, Ghosh15a, Wilkinson17}. 
+In contrast, patch-based approaches
+densely sample word hypotheses from the document images, cf. e.g., \cite{Gatos09, Almazan14a,
+Rothacker15, Rusinol15, Ghosh15}. By searching the full document, patch-based approaches do not 
+rely on heuristic detectors. However, they limit the search to a single patch size per
+query, thus assuming that the size variability is relatively low. Finally, in both approaches word
+hypotheses are ranked according to similarity with the query and overlapping hypotheses are
+suppressed if they obtained a non-optimal score. Segmentation-free methods, therefore derive
+the segmentation during the retrieval process and do not rely on a given segmentation that is
+assumed to be correct.
+
+Segmentation-free word spotting based on PHOC representations, cf. \cite{Almazan14}, has been presented in
+\cite{Ghosh15} and \cite{Ghosh15a} for the first time.
+%% hier hat Basti gekuerzt
+%The document image is divided in a regular grid of blocks. Each block is
+%represented with a Fisher vector. In order to obtain
+%PHOC representations per block, Attribute SVM scores of the Fisher vectors are obtained for each
+%PHOC component, i.e., for the different PHOC attributes. Finally, the PHOC vectors are
+%projected to a low dimensional common subspace that calibrates SVMs scores and binary PHOC string
+%encodings. For efficient patch-based retrieval, an
+%integral image over the block-wise PHOC vectors is computed. Using the integral image is
+%efficient, because a patch representation can be computed with one vector addition and two vector %subtractions. 
+%The PHOC vectors can be pre-computed and representations for arbitrarily sized patch
+%representation can instantly be computed at query time.
+%
+%In \cite{Ghosh15} a PHOC is obtained from the query word
+%image by computing Attribute SVM scores for the query image's Fisher vector representation.
+%After projecting the PHOC into the common subspace, the similarity between the query and the
+%patches is given by the dot product between query and patch representations. 
+%The most similar patches are re-ranked after adding spatial information to the Fisher vector
+%representations. While the patch-based retrieval framework is applied to entire document images
+%in \cite{Ghosh15}, it is only applied within document regions of interest in \cite{Ghosh15a}.
+Here, the document is divided into a number of blocks and a PHOC is predicted for each block.
+For efficient patch-based retrieval, an integral image over the block-wise PHOC vectors is computed.
+%The effectiveness of the proposed method lies in the fact that PHOC vectors can be 
+%pre-computed and representations for arbitrarily sized patch representation can instantly be computed %at query time.
+In order to improve the results, a regression is learned which projects PHOCs and predictions into a common subspace. At query time, the query PHOC is projected into this subspace.
+The similarity between the query and the patches is then determined through a dot product.
+While all patches are considered in \cite{Ghosh15}, the approach presented in \cite{Ghosh15a} adds an indexing stage in order to efficiently detect regions of interest. In this
+stage, connected components in close proximity to each other are combined in order to obtain
+word hypotheses.
+%Each hypothesis is indexed based on its attribute representation.
+%The binarization threshold is set relative to the mean document image
+%intensity. In the next step, connected components are grouped according to heuristic rules. For
+%this purpose an inner connected component bounding box is defined such that it contains 90\% of the
+%connected component pixels. Afterwards, connected components with intersecting inner bounding
+%boxes are merged. Furthermore, horizontally close connected components are merged. Different
+%thresholds are considered for creating multiple variants. In analogy to the PHOC Attribute SVM approach, 
+%these word region hypotheses are represented with a bi-gram attribute vector. Based on this
+%representation, each word region is indexed with an inverted file structure. 
+For retrieval, candidate word
+regions, obtained from the index, define the document image search area for the patch-based
+framework presented in \cite{Ghosh15}. 
+For query-by-example \cite{Ghosh15} the patch size equals to the size of the query word image
+and for query-by-string \cite{Ghosh15a} the patch size is estimated from training word images.
+
+Very recently, a method for proposing regions of interest and representing them with
+word string embeddings in an integrated manner has been presented \cite{Wilkinson17}.
+The authors train a Region Proposal Network in order to predict bounding boxes. Furthermore,
+the predicted bounding boxes are augmented with a set of heuristically generated region proposals. 
+A word string embedding is computed for each region. 
+Regions are retrieved according to cosine distance with the query.
+
+Related to word segmentation is text detection in natural scene images. 
+These methods need to cope 
+with large variability in the visual appearance of text.
+While this problem domain may seem to be less constrained compared to word
+segmentation, it has to be noted that the reliable detection of
+word boundaries in historic document images requires to correctly recognize the text in the document
+images first. In order to avoid recognition in our segmentation-free word spotting method, we
+are inspired by \emph{extremal regions}. 
+
+Extremal regions are part of the maximally stable extremal region (MSER) blob detection
+method \cite{Matas04}. The key idea is to derive blobs based on connected components in 
+thresholded images which are referred to as extremal regions (ER).
+%. In this regard, connected components are referred to as extremal regions
+%(ERs),
+%since the pixel intensity values within a connected component are all smaller (or greater)
+%than the pixel intensity values surrounding the connected component.% thus extremal.
+%
+In order to
+avoid the selection of a single threshold, MSERs are detected within an ER scale space. 
+This scale space is obtained by thresholding the image at all
+image intensity values. 
+%Across scales, ERs are organized in a tree
+%structure. This is possible because ERs only change monotonically with
+%monotonically changing threshold values for binarization.
+%ERs are maximally stable, and therefore MSERs, if the difference of two ERs on a path in the ER tree reaches a local minimum. 
+
+Building on the MSER approach, a method for text detection in natural scene images is presented
+in \cite{Neumann16}. The method consists of different stages where character candidates are
+first detected, grouped into triplets and finally merged into line regions.
+%The character detection stage is based on MSERs.
+For this purpose, ERs are extracted from color image channels.
+In contrast to the MSER blob detection \cite{Matas04}, the ER stability is
+defined on probabilistic character class scores obtained with a boosted decision tree \cite{Neumann16}. 
+%rather than on the pixel-wise difference of two ER. 
+The final decision whether an MSER becomes a character candidate is determined with an SVM classifier.
+%The integration of character classification scores for extracting maximally stable ER, adapts the approach to the problem domain of character detection. 
+
+In order to avoid the limitations of a basic connected component-based word detection, cf.
+e.g., \cite{Kovalchuk14}, or patch-based frameworks, cf. e.g., \cite{Almazan14a}, we propose
+to build ERs on top of pixel-wise text detector scores.
+%However, we do not directly transfer the approach presented in \cite{Neumann16}. 
+This way, we avoid the need for classifying ERs into words and non-words which would require a word recognizer.
+%Obtaining is recognizer is difficult to obtain, especially given the limited ER context. 
+%Instead we propose to directly build ERs on pixel-wise text detector scores. 
+The main advantage over a word recognizer is that the detector is applied on the entire
+document image and not limited to document image regions that have been heuristically selected. 
+This way ERs model different variants for word candidates, particularly in document image
+regions where the detector scores are ambiguous. In order to do so, we carefully adapt the ER
+selection strategy. Furthermore, the integration and combination of different 
+text detection approaches is straight forward. 
+
+To the best of our knowledge this is the first time that
+ERs are extracted based on detector scores. ERs have not been used in the context of
+segmentation-free word spotting in historic document images, before.
+%\begin{itemize}
+%	\item segmentation-free PHOC-based word spotting with Attribute SVMs \cite{Ghosh15,
+%		Ghosh15a}
+%	\item maximally stable extremal regions \cite{Matas04}
+%	\item Extremal region text detection \cite{Neumann16}
+%	\item CNNs and class activations maps
+%	\item Contributions
+%\end{itemize}
+
+
+%% DenseNets (Fabian)
+Similar to the ResNet architecture, Dense Convolutional Networks (DenseNets) \cite{Huang2017} also utilize identity connections.
+Each layer generates a new set of feature-maps, which are concatenated with the feature-maps provided by the skip-connection.
+Following this connectivity scheme, each layer receives all preceeding feature-maps as an input.
+The number of feature-maps added by each layer is refered to as the network's growth rate.
+Already small growth rates are sufficient to achieve state-of-the-art results, resulting in very narrow layers.
+To avoid the concatenation of differently sized feature-maps, DenseNet are organized into densely connected blocks.
+Consequently, pooling layers are only used outside the dense blocks.
+The model compactness of DenseNets is further improved by the introduction of compression layers.
+A compression layer corresponds to a convolutional layer with kernel size one.
+DenseNets tend to make stronger use of high-level features learned at the end of a dense block.
+Therefore, the convolutional layer reduces the number of features maps by a compression factor.
+The DenseNet architecture outperformed other networks such as ResNets in various state-of-the-art benchmark experiments in the field of image classification.
+It has been shown, that the dense architecture is especially parameter efficient and achieves competitive results, with significantly reduced numbers of parameters.
+
+
+
+
+

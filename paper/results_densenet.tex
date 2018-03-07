@@ -1,0 +1,25 @@
+% a summary of results achieved with the ResNet architecture (by Sebastian)
+
+\subsection{Results \& Discussion}\label{sec:eval_results}
+\begin{table*}%[]
+\centering
+\caption{Comparison of the different text detection methods for the Query-by-Example experiments [\%]}
+\label{tab:results}
+\begin{tabularx}{0.99\textwidth}{L{3.0}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}}
+    \toprule
+\multirow{2}{*}{Architecture}	& \multicolumn{3}{c}{George Washington} && \multicolumn{3}{c}{IAM} && \multicolumn{3}{c}{Botany?} \\ 
+										& mR		& mAP					&	& mR		& mAP					&	& mR		& mAP					\\
+\midrule
+ResNet Config 1					& 73.2	& 64.8				&	& 75.9	& 66.3				&	& 89.9	& 86.2				\\
+ResNet Config 2					& 88.4	& 80.7				&	& 77.9	& 68.9				&	& 91.6	& 87.1				\\
+\midrule
+DenseNet Config 1					& 81.8	& 77.0				&	& 80.5	& 71.6				&	& 81.6	& 76.1				\\
+DenseNet Config 2					& 86.3	& 80.1				&	& 82.2	& 73.0				&	& 90.1	& 86.1				\\
+\midrule
+Random Attributes Config 1 ?	& 35.4	& 31.0				&	& 63.6	& 53.9				&	& 77.8	& 70.3				\\
+Random Attributes Config 2 ?	& 67.8	& 59.9				&	& 68.2	& 59.1				&	& 89.5	& 83.5				\\
+\bottomrule
+
+\end{tabularx}
+\end{table*}
+% Experminet log files can be found in the repos experiment-logs folder.

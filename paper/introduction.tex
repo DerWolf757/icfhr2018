@@ -1,0 +1,103 @@
+\section{Introduction}\label{sec:introduction}
+Word spotting is an efficient method for making document images searchable. Therefore, it
+provides an essential functionality for working with large document image collections. 
+The approach is efficient since the search functionality is directly implemented and
+not a by-product of a more complex task, typically transcription.
+%In this way word spotting makes the most out of the given resources. 
+%In its simplest scenario, 
+Most commonly, the search query is either given as a word image in query-by-example scenarios or as 
+text in query-by-string scenarios.
+All word spotting methods need to either explicitly (segmentation-based) or implicitly (segmentation-free) segment the document collections into word image hypotheses.
+%So-called query-by-example word
+%spotting works with a single annotated sample of the query word. More annotated samples are
+%required in order to cope with high variability in visual appearance and to support textual queries, i.e., query-by-string.
+%The latter is typically the case for documents written by multiple authors.
+State-of-the-art methods project the word images into an embedded attribute space
+\cite{Almazan14} using \emph{Convolutional Neural Networks (CNN)} \cite{Sudholt17, Wilkinson17}. 
+In this space, word spotting can then be accomplished through a simple nearest neighbor search.
+%
+For historic documents, automatic segmentation is especially challenging due to high variability in
+%Word spotting is the ideal method for historic document images \cite{Llados12}. Historic
+%documents are non-standardized which means that every document image collection has its very
+%own characteristics w.r.t.
+writing style, document layout, visual appearance of ink and paper, as well as aging artifacts. 
+%Therefore, word segmentation in historic documents is especially challenging.
+%In this regard historic document images pose a particular challenge.
+%In order to spot words, it is required to segment the document into word hypotheses, first.
+%Here, we propose different methods for indicating word occurrences.
+%We explicitly model the uncertainty of our detectors in order to generate alternative word
+%hypotheses.
+%Word spotting methods relying on a given segmentation are called segmentation-based.
+%Due to the aforementioned challenges in historic document images, it is, unfortunately,
+%non-trivial to provide such a segmentation automatically.  
+
+Segmentation methods that have been successful in modern document images, such as projection
+profiles or connected components, are likely to fail for historic documents. Instead, these methods have to be
+manually tuned
+to the document collection's specificities. Interesting segmentation methods have been
+presented in \cite{Manmatha05} and \cite{Wilkinson15}. Within the scale space approach in
+\cite{Manmatha05}, some parameters can
+automatically be derived from data. The approach in \cite{Wilkinson15} uses a CNN for
+classifying segmentation hypotheses. The visual word appearance is, therefore, learned from
+annotated sample data. 
+However, methods addressing solely segmentation need to detect words without recognizing them
+or, in case of word spotting, without taking relevance to the query into account.   
+Therefore, these methods have to rely on discriminative characteristics of the document
+collections considered. In the challenging scenario of historic document images, it
+remains questionable, if suitable characteristics can automatically be extracted.
+This aspect can potentially limit the generalization capability.
+
+In order to be more robust with respect to word size variability,
+our segmentation-free word spotting method is inspired by approaches using local text
+detectors. In many cases text detectors are solely built on connected components, 
+e.g. \cite{Rodriguez09, Kovalchuk14, Ghosh15a}. %, Riba15}. 
+This has two important drawbacks. First, the
+detectors are dependent on document image binarization. In historic document images
+binarization is difficult due to fading ink, low contrast and inhomogeneous backgrounds. This
+makes detections imprecise. Second, it can be difficult to derive word hypotheses from
+connected components. Since connected components can represent parts of words, single words or
+multiple words, heuristic strategies for combining connected components are required.
+%Splitting connected components is hardly addressed at all, cf. \cite{Riba15} for an exception. 
+
+For these reasons, we propose to generate word hypotheses based on higher-level feature
+representations that indicate word occurrences. First, we predict scores for certain
+document image regions. These scores reflect whether the respective region contains text or not. The uncertainty of these scores is then explicitely modeled with
+extremal regions (ERs) \cite{Matas04} that have been very successful for text detection in
+natural scene images, cf. \cite{Neumann16}. The ER approach generates hypotheses of word bounding boxes. 
+For these, PHOCs are predicted using a TPP-PHOCNet \cite{Sudholt17}. This is essentially a \emph{Region-based CNN (R-CNN)} \cite{Girshick2016-RBC} framework.
+After predicting the PHOCs, word spotting can be performed through a nearest neighbor search.
+
+Generating the local text scores is a critical part of our method. Here, we consider three different approaches:
+SIFT contrast scores, local region classification scores generated with a CNN and 
+local word region scores obtained with an extension of CNN class activation maps \cite{Zhou2016-LDF}.
+%
+%In our PHOCNet-based word spotting framework 
+%we consider different methods: \textbf{to be revised\dots}
+%(i) SIFT contrast
+%scores, (ii) local word region scores estimated with a CNN and (iii) attribute activation maps %estimated
+%with a PHOCNet. The SIFT approach works without any annotated training material. Therefore, the
+%scores can be interpreted as text indicators. In contrast, the
+%neural network approaches need bounding boxes (ii) and bounding boxes with transcriptions
+%(iii), respectively. 
+%(i) local word region scores estimated with a CNN and 
+%(ii) attribute activation maps (AAM) estimated with the PHOCNet. 
+%In order to train the word region CNN (i), word bounding boxes are required. In contrast, the
+%AAM method (ii) only requires the PHOCNet and no additional model needs to be trained.
+%In all cases the uncertainty in the scores is explicitly modeled with
+%extremal regions \cite{Matas04} that have been very successful for text detection in
+%natural scene images, cf. \cite{Neumann16}.
+
+%The rest of this paper is organized as follows. 
+\autoref{sec:relatedwork} presents segmentation-free word spotting methods and briefly reviews extremal regions.
+Our segmentation-free word
+spotting approach and its evaluation are presented in \autoref{sec:method} and
+\autoref{sec:evaluation}. Finally, conclusions are drawn in \autoref{sec:conclusion}.
+ 
+
+%\begin{itemize}
+%	\item word spotting in historic document images
+%	\item segmentation-based vs segmentation-free
+%	\item PHOC \cite{Almazan14}, PHOCNet \cite{Sudholt16}
+%	\item hypotheses generation (patches, connected components)
+%	\item contributions
+%\end{itemize}

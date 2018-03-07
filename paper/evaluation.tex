@@ -1,0 +1,169 @@
+\section{Experiments}\label{sec:evaluation}
+%
+For the experiments with the PHOCnet architectures we used three benchmark datasets described in \autoref{sec:datasets} 
+and a evaluation protocol (\autoref{sec:protocol}) for segmentation-based wordspotting commonly used in the literature. 
+In \autoref{sec:training} we describe the training setup with all network hyper-parameter used to train the networks.
+Afterwards we discuss the retrieval results achieved by our methods and compare the architectures in \autoref{sec:results}.
+%
+%
+\subsection{Datasets}\label{sec:datasets}
+%
+We evaluate our method on three publicly available data sets. 
+The first is the \textbf{George Washington (GW) data set}. 
+It consists of 20 pages that are containing 4,860 annotated words.
+The pages originate from a letterbook and are quite homogeneous in their visual appearance.
+However, particularly for smaller words the annotation is very sloppy. As the GW data set does
+not have an official partitioning into training and test pages, we follow the common approach
+and perform a four-fold cross validation. Thus, the data set is split into batches of five
+consecutive documents each.
+
+The second benchmark is the large \textbf{IAM off-line dataset} comprising 1,539 pages of 
+modern handwritten English text containing 115,320 word images, written by 657 different writers. 
+We used the official partition available for writer independent text line recognition. We combined the training and 
+validation set to 64,XXX word images for training, and used the 13,XXX word images in the test set for evaluation. 
+We exclude the stop words as queries, as this is common in this benchmark.
+
+\textbf{Botany in British India (Botany)} is the third benchmark introduced in the Handwritting 
+Keyword Spotting Competition, held during the 2016 International Conference on Frontiers in 
+Handwriting Recognition. The training data of Botany was partitioned into three different 
+training sets from smaller to larger (\textit{Train \RN{1}} 1684, \textit{Train \RN{2}} 5295, and \textit{Train \RN{3}} 21981 images) 
+%
+%
+\subsection{Evaluation Protocol}\label{sec:protocol}
+%
+We evaluate the two CNN architectures for the data sets GW and IAM in the segmentation-based word spotting standard protocol 
+proposed in \cite{Almazan14}. For the \textit{QbE} scenario all test images are considered which occure at least 
+twice in the test set. For \textit{QbS} only unique string are used as queries. 
+The PHOCnet predictes a attribute representation for each given query, afterwards a nearest neighbor search is performed 
+by comparing the attribute vectors with the \textit{cosine similarity}. 
+The Retieval list is created by sorting the computed distances from nearest to farthest. Whereas in the QbE scenario only 
+predicted attribute representation are considered for a nearest neighbor search, the QbS scenario takes also the direct computed 
+string embedding from the transcription (query)
+
+
+\subsection{Training Setup}\label{sec:training}
+
+
+\subsection{Results \& Discussion}\label{sec:results}
+\begin{table*}%[]
+\centering
+\caption{Comparison of the different text detection methods for the Query-by-Example experiments [\%]}
+\label{tab:results}
+\begin{tabularx}{0.99\textwidth}{L{3.0}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}C{0.8}}
+    \toprule
+\multirow{2}{*}{Architecture}	& \multicolumn{2}{c}{George Washington} && \multicolumn{2}{c}{IAM} && \multicolumn{2}{c}{Botany?} \\ 
+										& mR		& mAP					&& mR		& mAP					&& mR		& mAP					\\
+\midrule
+ResNet Config 1					& 73.2	& 64.8				&& 75.9	& 66.3				&& 89.9	& 86.2				\\
+ResNet Config 2					& 88.4	& 80.7				&& 77.9	& 68.9				&& 91.6	& 87.1				\\
+\midrule
+DenseNet Config 1					& 81.8	& 77.0				&& 80.5	& 71.6				&& 81.6	& 76.1				\\
+DenseNet Config 2					& 86.3	& 80.1				&& 82.2	& 73.0				&& 90.1	& 86.1				\\
+\midrule
+Random Attributes Config 1 ?	& 35.4	& 31.0				&& 63.6	& 53.9				&& 77.8	& 70.3				\\
+Random Attributes Config 2 ?	& 67.8	& 59.9				&& 68.2	& 59.1				&& 89.5	& 83.5				\\
+\bottomrule
+
+\end{tabularx}
+\end{table*}
+% Experminet log files can be found in the repos experiment-logs folder.
+
+The QbE results achieved with our word hypothesis methods are listed 
+in \autoref{tab:results}. The DRs for all datasets show that we obtain very accurate
+results.
+High DR is a prerequisite for high retrieval performance. 
+Given a query, only the hypotheses can be retrieved that have been detected, beforehand.
+%Thus, DR is an upper bound for recall. Analogously, recall is an upper bound for average precision,
+%as average precision measures the area under the precision-recall curve. 
+
+An important result is that DR and retrieval performance can be improved when word
+hypothesis heights are quantized to values in $[h_{min}, h_{min}+5, \cdots h_{max}]$. 
+These parameters are estimated such that
+$h_{max}$ is the maximum word height in the training set and $h_{min}$ is set to the typical
+line height in the training set.
+On the GW dataset $h_{min}$ is set to 70 pixels, to 150 pixels on Konzilsprotokolle and to 120
+pixels on Botany. 
+In \autoref{tab:results} these experiments are denoted with \emph{quant}. 
+The positive effect has mainly three reasons. 
+First, quantization is required on GW due to the sloppy annotation of smaller words
+that are arbitrarily padded with white space, cf. \cite{Wilkinson17}. Accurate word hypotheses
+will, therefore, not be considered as relevant. 
+% Additionally such quantization has positive effect on retrieval speed. 
+% This is due to the fact that the aspectratio filter prunes more of such quatized regions in average. (Great impact in experiments see Evaluation.ods!) 
+Second, the TPP-PHOCNet tends to favor bounding boxes that fit the text core areas. Thus, $h_{min}$
+defines a lower bound for all word hypotheses. Third, retrieval speed can be improved by
+suppressing similar hypotheses.
+
+Regarding the text detectors, we evaluate the heuristic SIFT and the learned LRC and AAM
+methods.
+Further, we use linear combinations of SIFT and LRC or AAM scores, as denoted with LRC+SIFT and
+AAM+SIFT in \autoref{tab:results}. 
+While accurate results can be achieved with SIFT, 
+detection and retrieval results can be improved by adding the learning-based methods.
+The best DRs are obtained with detectors including LRC. 
+This is due to the explicit modeling of the visual appearance of 
+word boundaries. Consequently, this mostly applies to retrieval performance as well. An
+exception can be observed on GW where the training annotations for the LRC-CNN can be
+considered as noisy (see above). In contrast, the AAM detector learns the visual appearance of
+text. The results for the AAM detectors show that
+the TPP-PHOCNet focusses on text core areas the most. Therefore, word hypothesis bounding boxes tend to fit 
+closely to the words in the document.
+
+In \autoref{tab:state-of-the-art} we consider QbE and QbS scenarios with 50\% and 25\% region overlap for 
+the segmentation-free scenario. With respect to our best performing text detector configurations, the 
+trend in retrieval accuracy that we observed for QbE, can also be confirmed for QbS. 
+A closer look at the results for 25\% region overlap reveals that our word detections are often tighter than 
+the original bounding box annotations. Word hypotheses 
+that are ranked high in the retrieval list, have not been considered as relevant when using
+50\% region overlap.
+
+% Added for camera ready version.
+To obtain a feasible number of word hypotheses we adjusted the number of ER-thresholds to 50 for all detectors.
+In our best configuration %Regarding mAP
+on GW (c.f. \autoref{tab:state-of-the-art}) around 10\,000 hypotheses per page were computed. 
+After applying the aspect ratio filter approximately 5\,400 regions per query and page are left for scoring.
+This low number of filtered hypotheses leads to an average query time of ~60ms per page. 
+% This numbers referes to our best performing methods: GW AAM-SIFT-quant, Botany, Konzils AAM-SIFT/AAM-SIFT-quant
+% SIFT @50 scales produces around 19k hypotheses on GW and Botany, 27k on Konzilsprotokolle.
+% GW: AAM-SIFT-quant after aspect ratio filter -> 5,4k hypothesen -> ~89ms (Messung beinflusst durch auslastung des PCs! Alte Experimente ~60ms)  
+% GW: AAM-SIFT after aspect ratio filter -> 9k hypothesen -> ~120ms
+% On Botany ~300ms and Konzilsprotokolle ~280ms due to bigger phoc size.
+
+In comparison with the state-of-the-art our results compare very favourably. We outperform the previous 
+results on Botany and Konzilsprotokolle by a large margin. On GW only the very recently presented 
+Region Proposal CNNs \cite{Wilkinson17} achieve better results. However, the authors use an additional CNN 
+combined with brute-force hypotheses generation in order to cope with the inaccurate word annotations. 
+
+%Their word spotting system is by orders of magnitude more complex than our straight forward R-CNN architecture.
+%It has to be noted that 
+%QbS performance is generally higher      
+%The AAM-PHOCNet detects text most confidently in the core areas while giving not as high scores to regions featuring ascenders or decenders. Thus the bounding boxes predicted from the ER are biased towards smaller patches. While this behavior is not critical for simply indicating where certain words are, it drives down the performance of the overall system by a large margin. This is due to the fact that the overlap threshold is not met in order for a detection to count as relevant, especially for smaller words.
+
+
+\begin{table*}
+\centering
+\caption{State of the art comparison (Results are given in mAP [\%] at different overlap thresholds)}
+\label{tab:state-of-the-art}
+\begin{tabularx}{.99\textwidth}{L{2.8}C{0.6}C{0.6}C{0.6}C{0.6}C{0.4}C{0.6}C{0.6}C{0.6}C{0.6}C{0.4}C{0.6}C{0.6}C{0.6}C{0.6}}
+    \toprule
+\multirow{3}{*}{Method}&\multicolumn{4}{c}{George Washington}&&\multicolumn{4}{c}{Botany}&&\multicolumn{4}{c}{Konzilsprotokolle}                         \\
+ & \multicolumn{2}{c}{QbE} & \multicolumn{2}{c}{QbS} & & \multicolumn{2}{c}{QbE} & \multicolumn{2}{c}{QbS} && \multicolumn{2}{c}{QbE} & \multicolumn{2}{c}{QbS} \\
+     		   			& 50\% & 25\% & 50\% & 25\%&   & 50\% & 25\% & 50\% & 25\% & & 50\%   & 25\%   & 50\%   & 25\%   \\
+\midrule
+SIFT  					& 64.8 & 71.1 & 70.7 & 76.5 &  	& 66.3 & 75.2 & 68.9 & 79.0 & 	& 86.2 & 91.1 & 84.6 & 91.5 \\
+SIFT\textsubscript{quant}		& 80.7 & 90.6 & 82.5 & 89.1 &  	& 68.9 & 76.4 & 72.0 & 80.2 & 	& 87.1 & 94.0 & 87.4 & 92.9 \\
+LRC+SIFT				& 78.3 & 89.3 & 81.2 & 88.9 &	& 73.0 & 79.9 & 76.2 & 83.6 & 	& 88.4 & 94.9 & 86.6 & 95.6 \\  
+LRC+SIFT\textsubscript{quant} 		& 81.0 & 92.0 & 83.6 & 90.5 &  	& \textbf{74.5} & \textbf{80.4} & \textbf{78.8} & \textbf{85.3} & 	& \textbf{91.1} & 95.6 & \textbf{89.9} & 95.3 \\ 
+AAM+SIFT       				& 62.3 & 69.0 & 70.0 & 76.1 &  	& 67.8 & 75.4 & 71.0 & 80.1 & 	& 84.2 & 94.9 & 81.9 & 95.2 \\ 
+AAM+SIFT\textsubscript{quant} 		& 81.6 & 92.0 & 84.6 & 90.6 &  	& 69.4 & 75.9 & 74.0 & 80.3 &	& 89.6 & \textbf{96.2} & 88.9 & \textbf{96.0} \\ 
+\midrule
+BoF-HMM \cite{Rothacker15}    		& $-$  & $-$  & 76.5 & 80.1 &  & $-$  & $-$  & $-$  & $-$  && $-$  & $-$  & $-$  & $-$\\
+Ctrl-F-Net \cite{Wilkinson17} 		& \textbf{90.9} & \textbf{97.0} & \textbf{91.0} & \textbf{95.2} &  & $-$  & $-$  & $-$  & $-$  && $-$  & $-$  & $-$  & $-$\\
+TAU \cite{Pratikakis16}       		& $-$  & $-$  & $-$  & $-$  &  & 37.48& $-$  & $-$  & $-$  && 61.78& $-$  & $-$  & $-$\\
+Attribute-SVMs+RR\cite{Ghosh15a}    & $-$  & $-$  & 73.7  & $-$ &  & $-$ & $-$  & $-$  & $-$ & & $-$& $-$  & $-$  & $-$\\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+
+

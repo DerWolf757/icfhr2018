@@ -1,0 +1,21 @@
+\section{Method}\label{sec:method}
+
+
+\subsection{PHOCnet Architecture}\label{sec:text_det}
+
+ 
+\subsubsection{ResNet}\label{sec:text_det_sift}
+
+
+\subsubsection{DenseNet}\label{sec:DenseNet}
+For our experiments, we use a DenseNet with two densely connected blocks.
+Before entering the first block, a convolutional layer with 32 output channels and a $2x2$ average pooling layer are applied.
+Following the dense connectivity pattern, the first block consists of 30 convolutional layers with kernel sizes $3x3$ .
+For the second block 60 densely connected convolutional layers are used.
+The transition layer between both blocks uses a convolutional layer with kernel size $1x1$ and a $2x2$ average pooling layer.
+The convolutional layer compresses the number of feature maps by a factor of $0.5$
+Analogue to the \textit{TPP-PHOCNet} architecture, our DenseNet makes use of a 5-level TPP layer in combination with a Multilayer Perceptron.
+
+
+\subsection{Loss Function}\label{sec:word_class}
+
